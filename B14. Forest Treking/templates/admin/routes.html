@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Routes{% endblock %}
+{% block page_title %}Manage Trekking Routes{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-plus-circle"></i> Add New Route</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" class="form-styled">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Route Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., Mountain Summit Trail">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required placeholder="Describe the trail..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="difficulty" class="form-label">Difficulty Level</label>
+                        <select class="form-select" id="difficulty" name="difficulty" required>
+                            <option value="easy">Easy</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="difficult">Difficult</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Duration</label>
+                        <input type="text" class="form-control" id="duration" name="duration" required placeholder="e.g., 4 hours">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="max_capacity" class="form-label">Max Capacity</label>
+                                <input type="number" class="form-control" id="max_capacity" name="max_capacity" value="20" min="1">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Price ($)</label>
+                                <input type="number" class="form-control" id="price" name="price" value="50" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus"></i> Create Route
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-route"></i> All Routes</h2>
+            </div>
+            <div class="card-body">
+                {% if routes %}
+                <div class="table-responsive">
+                    <table class="table data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Difficulty</th>
+                                <th>Duration</th>
+                                <th>Capacity</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in routes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ route.name }}</strong>
+                                    <br><small class="text-muted">{{ route.description[:50] }}...</small>
+                                </td>
+                                <td>
+                                    <span class="badge difficulty-{{ route.difficulty }}">
+                                        {{ route.difficulty | title }}
+                                    </span>
+                                </td>
+                                <td>{{ route.duration }}</td>
+                                <td>{{ route.max_capacity }}</td>
+                                <td>${{ "%.2f"|format(route.price) }}</td>
+                                <td>
+                                    {% if route.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ route.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('admin_delete_route', route_id=route.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this route?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            
+                            <div class="modal fade" id="editModal{{ route.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Route: {{ route.name }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('admin_edit_route', route_id=route.id) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Route Name</label>
+                                                    <input type="text" class="form-control" name="name" value="{{ route.name }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Description</label>
+                                                    <textarea class="form-control" name="description" rows="3" required>{{ route.description }}</textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Difficulty</label>
+                                                    <select class="form-select" name="difficulty">
+                                                        <option value="easy" {% if route.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                                                        <option value="moderate" {% if route.difficulty == 'moderate' %}selected{% endif %}>Moderate</option>
+                                                        <option value="difficult" {% if route.difficulty == 'difficult' %}selected{% endif %}>Difficult</option>
+                                                        <option value="expert" {% if route.difficulty == 'expert' %}selected{% endif %}>Expert</option>
+                                                    </select>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Duration</label>
+                                                            <input type="text" class="form-control" name="duration" value="{{ route.duration }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Max Capacity</label>
+                                                            <input type="number" class="form-control" name="max_capacity" value="{{ route.max_capacity }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Price ($)</label>
+                                                    <input type="number" class="form-control" name="price" value="{{ route.price }}" step="0.01">
+                                                </div>
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="is_active" id="active{{ route.id }}" {% if route.is_active %}checked{% endif %}>
+                                                    <label class="form-check-label" for="active{{ route.id }}">Active</label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <p>No routes created yet</p>
+                    <small>Create your first trekking route using the form</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

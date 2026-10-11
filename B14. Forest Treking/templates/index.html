@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block public_content %}
+<div class="landing-page">
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-logo">
+                <i class="fas fa-tree"></i>
+                <i class="fas fa-mountain"></i>
+                <i class="fas fa-tree"></i>
+            </div>
+            <h1>Encrypted Forest Trekking</h1>
+            <p class="hero-subtitle">Secure Ticket Booking & Validation Platform</p>
+            <p class="hero-description">
+                Experience the wilderness with confidence. Our platform ensures secure bookings 
+                with RIPEMD-160 encryption for all your sensitive data and file transfers.
+            </p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-user-plus"></i> Register
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="features-section">
+        <div class="container">
+            <h2 class="section-title">Platform Features</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Secure Encryption</h3>
+                        <p>All files and sensitive data are encrypted using RIPEMD-160 hashing with AES encryption for maximum security.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-hiking"></i>
+                        </div>
+                        <h3>Trek Booking</h3>
+                        <p>Browse and book exciting forest trekking adventures with easy scheduling and instant confirmation.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <h3>Secure File Transfer</h3>
+                        <p>Share encrypted files securely between users, managers, and administrators with full audit trails.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="roles-section">
+        <div class="container">
+            <h2 class="section-title">User Roles</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="role-card role-admin-card">
+                        <div class="role-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3>Administrator</h3>
+                        <ul>
+                            <li>Manage trekking routes</li>
+                            <li>User management</li>
+                            <li>View all bookings</li>
+                            <li>System reports</li>
+                            <li>Full platform control</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="role-card role-manager-card">
+                        <div class="role-icon">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                        <h3>Trekking Management</h3>
+                        <ul>
+                            <li>Schedule trail sessions</li>
+                            <li>View bookings</li>
+                            <li>Encrypted file manager</li>
+                            <li>Share secret data</li>
+                            <li>Trail coordination</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="role-card role-user-card">
+                        <div class="role-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3>Trekker (User)</h3>
+                        <ul>
+                            <li>Browse available treks</li>
+                            <li>Book adventures</li>
+                            <li>Upload encrypted files</li>
+                            <li>Receive shared data</li>
+                            <li>Manage bookings</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="landing-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-tree"></i> Forest Trekking Platform
+                </div>
+                <p>Secure | Encrypted | Adventure Awaits</p>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}

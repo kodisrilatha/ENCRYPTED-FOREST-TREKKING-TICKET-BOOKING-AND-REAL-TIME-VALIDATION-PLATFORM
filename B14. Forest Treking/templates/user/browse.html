@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Treks{% endblock %}
+{% block page_title %}Browse Trekking Adventures{% endblock %}
+
+{% block content %}
+<div class="browse-header mb-4">
+    <div class="browse-intro">
+        <i class="fas fa-mountain"></i>
+        <div>
+            <h2>Discover Your Next Adventure</h2>
+            <p>Choose from our curated selection of forest trekking routes</p>
+        </div>
+    </div>
+</div>
+
+{% if routes %}
+<div class="trek-grid">
+    {% for route in routes %}
+    <div class="trek-card">
+        <div class="trek-card-header">
+            <div class="trek-image">
+                <i class="fas fa-tree"></i>
+                <i class="fas fa-mountain"></i>
+                <i class="fas fa-tree"></i>
+            </div>
+            <span class="difficulty-badge difficulty-{{ route.difficulty }}">
+                {{ route.difficulty | title }}
+            </span>
+        </div>
+        <div class="trek-card-body">
+            <h3>{{ route.name }}</h3>
+            <p class="trek-description">{{ route.description }}</p>
+            <div class="trek-details">
+                <div class="trek-detail">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ route.duration }}</span>
+                </div>
+                <div class="trek-detail">
+                    <i class="fas fa-users"></i>
+                    <span>Max {{ route.max_capacity }}</span>
+                </div>
+                <div class="trek-detail">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>${{ "%.2f"|format(route.price) }}/person</span>
+                </div>
+            </div>
+            
+            {% if route.schedules %}
+            <div class="trek-schedules">
+                <h5><i class="fas fa-calendar-alt"></i> Available Dates</h5>
+                <div class="schedule-tags">
+                    {% for schedule in route.schedules[:3] %}
+                    <span class="schedule-tag">
+                        {{ schedule.date }} at {{ schedule.time }}
+                    </span>
+                    {% endfor %}
+                    {% if route.schedules | length > 3 %}
+                    <span class="schedule-more">+{{ route.schedules | length - 3 }} more</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="trek-card-footer">
+            <a href="{{ url_for('user_book', route_id=route.id) }}" class="btn btn-primary w-100">
+                <i class="fas fa-ticket-alt"></i> Book Now
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-large">
+    <div class="empty-icon">
+        <i class="fas fa-map-marked-alt"></i>
+    </div>
+    <h3>No Treks Available</h3>
+    <p>Check back later for exciting trekking adventures!</p>
+</div>
+{% endif %}
+{% endblock %}

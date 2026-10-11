@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}System Reports{% endblock %}
+{% block page_title %}System Reports & Analytics{% endblock %}
+
+{% block content %}
+<div class="stats-row mb-4">
+    <div class="stat-card">
+        <div class="stat-icon bg-success">
+            <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="stat-info">
+            <h3>${{ "%.2f"|format(total_revenue) }}</h3>
+            <p>Total Revenue</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon bg-primary">
+            <i class="fas fa-ticket-alt"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ stats.total_bookings }}</h3>
+            <p>Total Bookings</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon bg-info">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ stats.total_users }}</h3>
+            <p>Registered Users</p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon bg-warning">
+            <i class="fas fa-route"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ stats.total_routes }}</h3>
+            <p>Active Routes</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-pie"></i> Booking Status Distribution</h2>
+            </div>
+            <div class="card-body">
+                <div class="status-distribution">
+                    <div class="status-item">
+                        <div class="status-bar">
+                            <div class="status-fill bg-success" style="width: {{ (confirmed / (confirmed + cancelled + pending) * 100) if (confirmed + cancelled + pending) > 0 else 0 }}%"></div>
+                        </div>
+                        <div class="status-info">
+                            <span class="status-label">
+                                <i class="fas fa-check-circle text-success"></i> Confirmed
+                            </span>
+                            <span class="status-count">{{ confirmed }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-bar">
+                            <div class="status-fill bg-warning" style="width: {{ (pending / (confirmed + cancelled + pending) * 100) if (confirmed + cancelled + pending) > 0 else 0 }}%"></div>
+                        </div>
+                        <div class="status-info">
+                            <span class="status-label">
+                                <i class="fas fa-clock text-warning"></i> Pending
+                            </span>
+                            <span class="status-count">{{ pending }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-bar">
+                            <div class="status-fill bg-danger" style="width: {{ (cancelled / (confirmed + cancelled + pending) * 100) if (confirmed + cancelled + pending) > 0 else 0 }}%"></div>
+                        </div>
+                        <div class="status-info">
+                            <span class="status-label">
+                                <i class="fas fa-times-circle text-danger"></i> Cancelled
+                            </span>
+                            <span class="status-count">{{ cancelled }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-user-friends"></i> User Breakdown</h2>
+            </div>
+            <div class="card-body">
+                <div class="user-breakdown">
+                    <div class="breakdown-item">
+                        <div class="breakdown-icon bg-danger-light">
+                            <i class="fas fa-user-shield text-danger"></i>
+                        </div>
+                        <div class="breakdown-info">
+                            <h4>{{ stats.admin_count }}</h4>
+                            <span>Administrators</span>
+                        </div>
+                    </div>
+                    
+                    <div class="breakdown-item">
+                        <div class="breakdown-icon bg-warning-light">
+                            <i class="fas fa-mountain text-warning"></i>
+                        </div>
+                        <div class="breakdown-info">
+                            <h4>{{ stats.manager_count }}</h4>
+                            <span>Trek Managers</span>
+                        </div>
+                    </div>
+                    
+                    <div class="breakdown-item">
+                        <div class="breakdown-icon bg-success-light">
+                            <i class="fas fa-hiking text-success"></i>
+                        </div>
+                        <div class="breakdown-info">
+                            <h4>{{ stats.user_count }}</h4>
+                            <span>Trekkers</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content-card mt-4">
+    <div class="card-header">
+        <h2><i class="fas fa-map-marked-alt"></i> Route Performance</h2>
+    </div>
+    <div class="card-body">
+        {% if route_stats %}
+        <div class="table-responsive">
+            <table class="table data-table">
+                <thead>
+                    <tr>
+                        <th>Route Name</th>
+                        <th>Total Bookings</th>
+                        <th>Revenue Generated</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in route_stats %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-route text-primary me-2"></i>
+                            {{ route.name }}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ route.total_bookings }}</span>
+                        </td>
+                        <td><strong>${{ "%.2f"|format(route.revenue) }}</strong></td>
+                        <td>
+                            <div class="progress" style="height: 8px; width: 100px;">
+                                <div class="progress-bar bg-success" style="width: {{ (route.revenue / total_revenue * 100) if total_revenue > 0 else 0 }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-chart-bar"></i>
+            <p>No route data available</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="content-card mt-4">
+    <div class="card-header">
+        <h2><i class="fas fa-shield-alt"></i> Encryption Statistics</h2>
+    </div>
+    <div class="card-body">
+        <div class="encryption-stats">
+            <div class="enc-stat-item">
+                <div class="enc-icon">
+                    <i class="fas fa-file-lock"></i>
+                </div>
+                <div class="enc-info">
+                    <h4>{{ stats.total_files }}</h4>
+                    <span>Encrypted Files</span>
+                </div>
+            </div>
+            <div class="enc-stat-item">
+                <div class="enc-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="enc-info">
+                    <h4>RIPEMD-160</h4>
+                    <span>Encryption Algorithm</span>
+                </div>
+            </div>
+            <div class="enc-stat-item">
+                <div class="enc-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="enc-info">
+                    <h4>AES-256</h4>
+                    <span>File Encryption</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

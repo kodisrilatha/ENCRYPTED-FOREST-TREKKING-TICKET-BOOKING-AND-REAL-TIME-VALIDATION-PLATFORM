@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Book Trek{% endblock %}
+{% block page_title %}Book Your Adventure{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-hiking"></i> {{ route.name }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="route-details">
+                    <div class="route-image-placeholder">
+                        <i class="fas fa-tree"></i>
+                        <i class="fas fa-mountain"></i>
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    
+                    <div class="route-info">
+                        <p class="route-description">{{ route.description }}</p>
+                        
+                        <div class="route-specs">
+                            <div class="spec-item">
+                                <i class="fas fa-signal"></i>
+                                <div>
+                                    <strong>Difficulty</strong>
+                                    <span class="badge difficulty-{{ route.difficulty }}">{{ route.difficulty | title }}</span>
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-clock"></i>
+                                <div>
+                                    <strong>Duration</strong>
+                                    <span>{{ route.duration }}</span>
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-users"></i>
+                                <div>
+                                    <strong>Max Capacity</strong>
+                                    <span>{{ route.max_capacity }} people</span>
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <i class="fas fa-tag"></i>
+                                <div>
+                                    <strong>Price</strong>
+                                    <span class="price">${{ "%.2f"|format(route.price) }} per person</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="content-card booking-form-card">
+            <div class="card-header">
+                <h2><i class="fas fa-ticket-alt"></i> Book Now</h2>
+            </div>
+            <div class="card-body">
+                {% if schedules %}
+                <form method="POST" class="form-styled">
+                    <div class="mb-3">
+                        <label for="schedule_id" class="form-label">Select Date & Time</label>
+                        <select class="form-select" id="schedule_id" name="schedule_id" required>
+                            <option value="">Choose a schedule...</option>
+                            {% for schedule in schedules %}
+                            <option value="{{ schedule.id }}">
+                                {{ schedule.date }} at {{ schedule.time }} 
+                                ({{ schedule.available_slots - schedule.booked_slots }} slots left)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="num_participants" class="form-label">Number of Participants</label>
+                        <input type="number" class="form-control" id="num_participants" name="num_participants" value="1" min="1" max="{{ route.max_capacity }}" required>
+                    </div>
+                    
+                    <div class="price-summary">
+                        <div class="price-row">
+                            <span>Price per person:</span>
+                            <span>${{ "%.2f"|format(route.price) }}</span>
+                        </div>
+                        <div class="price-row total">
+                            <span>Total:</span>
+                            <span id="totalPrice">${{ "%.2f"|format(route.price) }}</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-check-circle"></i> Confirm Booking
+                    </button>
+                </form>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No schedules available</p>
+                    <small>Please check back later</small>
+                </div>
+                {% endif %}
+                
+                <a href="{{ url_for('user_browse') }}" class="btn btn-outline-secondary w-100 mt-3">
+                    <i class="fas fa-arrow-left"></i> Back to Browse
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const pricePerPerson = {{ route.price }};
+    const numInput = document.getElementById('num_participants');
+    const totalDisplay = document.getElementById('totalPrice');
+    
+    if (numInput && totalDisplay) {
+        numInput.addEventListener('change', function() {
+            const total = this.value * pricePerPerson;
+            totalDisplay.textContent = '$' + total.toFixed(2);
+        });
+    }
+</script>
+{% endblock %}

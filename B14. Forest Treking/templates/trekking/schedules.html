@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Trail Schedules{% endblock %}
+{% block page_title %}Manage Trail Schedules{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-plus-circle"></i> Create Schedule</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" class="form-styled">
+                    <div class="mb-3">
+                        <label for="route_id" class="form-label">Select Route</label>
+                        <select class="form-select" id="route_id" name="route_id" required>
+                            <option value="">Choose a route...</option>
+                            {% for route in routes %}
+                            <option value="{{ route.id }}">{{ route.name }} ({{ route.difficulty }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Start Time</label>
+                        <input type="time" class="form-control" id="time" name="time" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="available_slots" class="form-label">Available Slots</label>
+                        <input type="number" class="form-control" id="available_slots" name="available_slots" value="20" min="1" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-calendar-plus"></i> Create Schedule
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-calendar-alt"></i> All Schedules</h2>
+            </div>
+            <div class="card-body">
+                {% if schedules %}
+                <div class="table-responsive">
+                    <table class="table data-table">
+                        <thead>
+                            <tr>
+                                <th>Route</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Slots</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                            <tr>
+                                <td>
+                                    {% if schedule.route %}
+                                    <strong>{{ schedule.route.name }}</strong>
+                                    <br><small class="text-muted">{{ schedule.route.difficulty | title }}</small>
+                                    {% else %}
+                                    <span class="text-muted">Route not found</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <i class="fas fa-calendar text-primary me-1"></i>
+                                    {{ schedule.date }}
+                                </td>
+                                <td>
+                                    <i class="fas fa-clock text-info me-1"></i>
+                                    {{ schedule.time }}
+                                </td>
+                                <td>
+                                    <div class="slot-info">
+                                        <span class="slot-available">{{ schedule.available_slots - schedule.booked_slots }}</span>
+                                        <span class="slot-divider">/</span>
+                                        <span class="slot-total">{{ schedule.available_slots }}</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar bg-success" style="width: {{ ((schedule.available_slots - schedule.booked_slots) / schedule.available_slots * 100) if schedule.available_slots > 0 else 0 }}%"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if schedule.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ schedule.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <div class="modal fade" id="editModal{{ schedule.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Schedule</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('trekking_edit_schedule', schedule_id=schedule.id) }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Date</label>
+                                                    <input type="date" class="form-control" name="date" value="{{ schedule.date }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Time</label>
+                                                    <input type="time" class="form-control" name="time" value="{{ schedule.time }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Available Slots</label>
+                                                    <input type="number" class="form-control" name="available_slots" value="{{ schedule.available_slots }}" min="1">
+                                                </div>
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" name="is_active" id="active{{ schedule.id }}" {% if schedule.is_active %}checked{% endif %}>
+                                                    <label class="form-check-label" for="active{{ schedule.id }}">Active</label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No schedules created yet</p>
+                    <small>Create your first schedule using the form</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

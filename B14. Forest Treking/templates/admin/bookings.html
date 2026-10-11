@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}View Bookings{% endblock %}
+{% block page_title %}All Bookings{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="card-header">
+        <h2><i class="fas fa-ticket-alt"></i> Booking Management</h2>
+        <div class="header-info">
+            <span class="badge bg-primary">{{ bookings | length }} Total</span>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if bookings %}
+        <div class="table-responsive">
+            <table class="table data-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Route</th>
+                        <th>Date</th>
+                        <th>Participants</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td><strong>#{{ booking.id }}</strong></td>
+                        <td>
+                            {% if booking.user %}
+                                <div class="user-cell">
+                                    <i class="fas fa-user"></i>
+                                    <div>
+                                        <span>{{ booking.user.full_name }}</span>
+                                        <small class="text-muted d-block">{{ booking.user.email }}</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">User Not Found</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if booking.route %}
+                                <div>
+                                    <span>{{ booking.route.name }}</span>
+                                    <span class="badge difficulty-{{ booking.route.difficulty }} ms-2">{{ booking.route.difficulty }}</span>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">Route Not Found</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ booking.booking_date }}</td>
+                        <td>
+                            <span class="badge bg-info">
+                                <i class="fas fa-users"></i> {{ booking.num_participants }}
+                            </span>
+                        </td>
+                        <td><strong>${{ "%.2f"|format(booking.total_price) }}</strong></td>
+                        <td>
+                            <span class="status-badge status-{{ booking.status }}">
+                                {% if booking.status == 'confirmed' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif booking.status == 'cancelled' %}
+                                    <i class="fas fa-times-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-clock"></i>
+                                {% endif %}
+                                {{ booking.status | title }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Update Status
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <form method="POST" action="{{ url_for('admin_update_booking', booking_id=booking.id) }}">
+                                            <input type="hidden" name="status" value="confirmed">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-check text-success"></i> Confirm
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('admin_update_booking', booking_id=booking.id) }}">
+                                            <input type="hidden" name="status" value="pending">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-clock text-warning"></i> Pending
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('admin_update_booking', booking_id=booking.id) }}">
+                                            <input type="hidden" name="status" value="cancelled">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-times text-danger"></i> Cancel
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <p>No bookings yet</p>
+            <small>Bookings will appear here when users book treks</small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="stat-card-mini">
+            <i class="fas fa-check-circle text-success"></i>
+            <div>
+                <h4>{{ bookings | selectattr('status', 'equalto', 'confirmed') | list | length }}</h4>
+                <span>Confirmed</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card-mini">
+            <i class="fas fa-clock text-warning"></i>
+            <div>
+                <h4>{{ bookings | selectattr('status', 'equalto', 'pending') | list | length }}</h4>
+                <span>Pending</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card-mini">
+            <i class="fas fa-times-circle text-danger"></i>
+            <div>
+                <h4>{{ bookings | selectattr('status', 'equalto', 'cancelled') | list | length }}</h4>
+                <span>Cancelled</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

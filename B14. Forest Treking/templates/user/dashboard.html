@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ bookings | length }}</h3>
+                <p>My Bookings</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-success">
+                <i class="fas fa-file-upload"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ my_files | length }}</h3>
+                <p>My Files</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-warning">
+                <i class="fas fa-file-download"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ shared_files | length }}</h3>
+                <p>Shared Files</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-info">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ unread_secrets }}</h3>
+                <p>New Messages</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-ticket-alt"></i> My Recent Bookings</h2>
+                    <a href="{{ url_for('user_bookings') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if bookings %}
+                    <div class="booking-list">
+                        {% for booking in bookings[:5] %}
+                        <div class="booking-item">
+                            <div class="booking-icon">
+                                <i class="fas fa-hiking"></i>
+                            </div>
+                            <div class="booking-info">
+                                <h4>{% if booking.route %}{{ booking.route.name }}{% else %}Trek Booking{% endif %}</h4>
+                                <div class="booking-meta">
+                                    <span><i class="fas fa-calendar"></i> {{ booking.booking_date }}</span>
+                                    <span><i class="fas fa-users"></i> {{ booking.num_participants }} person(s)</span>
+                                    <span><i class="fas fa-dollar-sign"></i> ${{ "%.2f"|format(booking.total_price) }}</span>
+                                </div>
+                            </div>
+                            <span class="status-badge status-{{ booking.status }}">
+                                {{ booking.status | title }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-hiking"></i>
+                        <p>No bookings yet</p>
+                        <a href="{{ url_for('user_browse') }}" class="btn btn-primary btn-sm">Browse Treks</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="content-card mb-4">
+                <div class="card-header">
+                    <h2><i class="fas fa-bell"></i> Notifications</h2>
+                </div>
+                <div class="card-body">
+                    {% if unread_secrets > 0 %}
+                    <div class="notification-item">
+                        <i class="fas fa-envelope text-primary"></i>
+                        <div>
+                            <strong>{{ unread_secrets }} unread message(s)</strong>
+                            <a href="{{ url_for('user_shared') }}">View Messages</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if shared_files | length > 0 %}
+                    <div class="notification-item">
+                        <i class="fas fa-file-alt text-success"></i>
+                        <div>
+                            <strong>{{ shared_files | length }} shared file(s)</strong>
+                            <a href="{{ url_for('user_files') }}">View Files</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if unread_secrets == 0 and shared_files | length == 0 %}
+                    <div class="empty-state small">
+                        <i class="fas fa-check-circle"></i>
+                        <p>All caught up!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-shield-alt"></i> Security</h2>
+                </div>
+                <div class="card-body">
+                    <div class="security-info">
+                        <div class="security-item">
+                            <i class="fas fa-lock text-success"></i>
+                            <span>RIPEMD-160 Encryption</span>
+                        </div>
+                        <div class="security-item">
+                            <i class="fas fa-key text-primary"></i>
+                            <span>AES-256 File Security</span>
+                        </div>
+                        <div class="security-item">
+                            <i class="fas fa-exchange-alt text-info"></i>
+                            <span>Secure File Transfer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="quick-actions mt-4">
+        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="{{ url_for('user_browse') }}" class="action-btn">
+                <i class="fas fa-search"></i>
+                <span>Browse Treks</span>
+            </a>
+            <a href="{{ url_for('user_bookings') }}" class="action-btn">
+                <i class="fas fa-list-alt"></i>
+                <span>My Bookings</span>
+            </a>
+            <a href="{{ url_for('user_files') }}" class="action-btn">
+                <i class="fas fa-upload"></i>
+                <span>Upload File</span>
+            </a>
+            <a href="{{ url_for('user_shared') }}" class="action-btn">
+                <i class="fas fa-envelope"></i>
+                <span>Messages</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

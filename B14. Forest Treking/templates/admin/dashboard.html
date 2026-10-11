@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Administrator Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.total_users }}</h3>
+                <p>Total Users</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-success">
+                <i class="fas fa-route"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.total_routes }}</h3>
+                <p>Trekking Routes</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-warning">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.total_bookings }}</h3>
+                <p>Total Bookings</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon bg-info">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.total_files }}</h3>
+                <p>Encrypted Files</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user-friends"></i> User Distribution</h2>
+                </div>
+                <div class="card-body">
+                    <div class="user-dist-item">
+                        <div class="user-dist-label">
+                            <i class="fas fa-user-shield text-danger"></i>
+                            <span>Administrators</span>
+                        </div>
+                        <span class="badge bg-danger">{{ stats.admin_count }}</span>
+                    </div>
+                    <div class="user-dist-item">
+                        <div class="user-dist-label">
+                            <i class="fas fa-mountain text-warning"></i>
+                            <span>Trek Managers</span>
+                        </div>
+                        <span class="badge bg-warning">{{ stats.manager_count }}</span>
+                    </div>
+                    <div class="user-dist-item">
+                        <div class="user-dist-label">
+                            <i class="fas fa-hiking text-success"></i>
+                            <span>Trekkers</span>
+                        </div>
+                        <span class="badge bg-success">{{ stats.user_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clock"></i> Recent Bookings</h2>
+                </div>
+                <div class="card-body">
+                    {% if recent_bookings %}
+                        <div class="recent-list">
+                            {% for booking in recent_bookings %}
+                            <div class="recent-item">
+                                <div class="recent-icon">
+                                    <i class="fas fa-ticket-alt"></i>
+                                </div>
+                                <div class="recent-info">
+                                    <span class="recent-title">Booking #{{ booking.id }}</span>
+                                    <span class="recent-meta">{{ booking.booking_date }} - {{ booking.num_participants }} participant(s)</span>
+                                </div>
+                                <span class="badge bg-{{ 'success' if booking.status == 'confirmed' else 'danger' if booking.status == 'cancelled' else 'warning' }}">
+                                    {{ booking.status }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No bookings yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user-plus"></i> Recent Users</h2>
+                </div>
+                <div class="card-body">
+                    {% if recent_users %}
+                    <div class="table-responsive">
+                        <table class="table data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>{{ user.full_name }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="role-tag role-{{ user.role }}">
+                                            {{ user.role | replace('_', ' ') | title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at[:10] if user.created_at else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-users-slash"></i>
+                            <p>No users yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="quick-actions mt-4">
+        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="{{ url_for('admin_routes') }}" class="action-btn">
+                <i class="fas fa-plus-circle"></i>
+                <span>Add Route</span>
+            </a>
+            <a href="{{ url_for('admin_users') }}" class="action-btn">
+                <i class="fas fa-user-cog"></i>
+                <span>Manage Users</span>
+            </a>
+            <a href="{{ url_for('admin_bookings') }}" class="action-btn">
+                <i class="fas fa-list-alt"></i>
+                <span>View Bookings</span>
+            </a>
+            <a href="{{ url_for('admin_reports') }}" class="action-btn">
+                <i class="fas fa-chart-line"></i>
+                <span>View Reports</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

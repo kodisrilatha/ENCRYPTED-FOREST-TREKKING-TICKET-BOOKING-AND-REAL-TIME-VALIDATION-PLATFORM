@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Forest Trekking{% endblock %} - Encrypted Booking Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-tree"></i>
+                    <span>Forest Trek</span>
+                </div>
+                <div class="role-badge role-{{ current_user.role }}">
+                    {% if current_user.role == 'admin' %}
+                        <i class="fas fa-shield-alt"></i> Administrator
+                    {% elif current_user.role == 'trekking_management' %}
+                        <i class="fas fa-mountain"></i> Trek Manager
+                    {% else %}
+                        <i class="fas fa-user"></i> Trekker
+                    {% endif %}
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('admin_routes') }}" class="nav-item {% if request.endpoint == 'admin_routes' %}active{% endif %}">
+                        <i class="fas fa-route"></i> Manage Routes
+                    </a>
+                    <a href="{{ url_for('admin_users') }}" class="nav-item {% if request.endpoint == 'admin_users' %}active{% endif %}">
+                        <i class="fas fa-users"></i> Manage Users
+                    </a>
+                    <a href="{{ url_for('admin_bookings') }}" class="nav-item {% if request.endpoint == 'admin_bookings' %}active{% endif %}">
+                        <i class="fas fa-ticket-alt"></i> View Bookings
+                    </a>
+                    <a href="{{ url_for('admin_reports') }}" class="nav-item {% if request.endpoint == 'admin_reports' %}active{% endif %}">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                {% elif current_user.role == 'trekking_management' %}
+                    <a href="{{ url_for('trekking_dashboard') }}" class="nav-item {% if request.endpoint == 'trekking_dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('trekking_schedules') }}" class="nav-item {% if request.endpoint == 'trekking_schedules' %}active{% endif %}">
+                        <i class="fas fa-calendar-alt"></i> Trail Schedules
+                    </a>
+                    <a href="{{ url_for('trekking_bookings') }}" class="nav-item {% if request.endpoint == 'trekking_bookings' %}active{% endif %}">
+                        <i class="fas fa-ticket-alt"></i> View Bookings
+                    </a>
+                    <a href="{{ url_for('trekking_files') }}" class="nav-item {% if request.endpoint == 'trekking_files' %}active{% endif %}">
+                        <i class="fas fa-lock"></i> Encrypted Files
+                    </a>
+                    <a href="{{ url_for('trekking_share') }}" class="nav-item {% if request.endpoint == 'trekking_share' %}active{% endif %}">
+                        <i class="fas fa-share-alt"></i> Share Secrets
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('user_dashboard') }}" class="nav-item {% if request.endpoint == 'user_dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('user_browse') }}" class="nav-item {% if request.endpoint == 'user_browse' %}active{% endif %}">
+                        <i class="fas fa-hiking"></i> Browse Treks
+                    </a>
+                    <a href="{{ url_for('user_bookings') }}" class="nav-item {% if request.endpoint == 'user_bookings' %}active{% endif %}">
+                        <i class="fas fa-ticket-alt"></i> My Bookings
+                    </a>
+                    <a href="{{ url_for('user_files') }}" class="nav-item {% if request.endpoint == 'user_files' %}active{% endif %}">
+                        <i class="fas fa-file-upload"></i> Encrypted Files
+                    </a>
+                    <a href="{{ url_for('user_shared') }}" class="nav-item {% if request.endpoint == 'user_shared' %}active{% endif %}">
+                        <i class="fas fa-envelope-open-text"></i> Shared Data
+                    </a>
+                {% endif %}
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>{{ current_user.full_name }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                <div class="top-bar-actions">
+                    <span class="welcome-text">Welcome, {{ current_user.full_name }}</span>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    {% else %}
+    <div class="public-page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mt-4">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block public_content %}{% endblock %}
+    </div>
+    {% endif %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

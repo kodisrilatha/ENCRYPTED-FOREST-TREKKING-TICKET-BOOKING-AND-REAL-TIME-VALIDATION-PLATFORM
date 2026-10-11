@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Shared Data{% endblock %}
+{% block page_title %}Shared Secret Data{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-share-alt"></i> Send Secret Message</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('user_share_secret') }}" class="form-styled">
+                    <div class="mb-3">
+                        <label for="recipient_role" class="form-label">Send To</label>
+                        <select class="form-select" id="recipient_role" name="recipient_role" required>
+                            <option value="">Select recipient...</option>
+                            <option value="trekking_management">Trekking Management</option>
+                            <option value="admin">Administrators</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="title" name="title" required placeholder="Enter subject...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Secret Message</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required placeholder="Enter your confidential message..."></textarea>
+                    </div>
+                    
+                    <div class="encryption-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <strong>End-to-End Encryption</strong>
+                            <span>Your message will be encrypted with RIPEMD-160</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        <i class="fas fa-paper-plane"></i> Send Encrypted Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-7">
+        <div class="content-card mb-4">
+            <div class="card-header">
+                <h2><i class="fas fa-inbox"></i> Received Messages</h2>
+            </div>
+            <div class="card-body">
+                {% if received_secrets %}
+                <div class="message-list">
+                    {% for secret in received_secrets %}
+                    <div class="message-item {% if not secret.is_read %}unread{% endif %}">
+                        <div class="message-header">
+                            <div class="message-sender">
+                                <i class="fas fa-user-circle"></i>
+                                <span>{{ secret.sender_name }}</span>
+                                <span class="badge bg-{{ 'danger' if secret.sender_role == 'admin' else 'warning' if secret.sender_role == 'trekking_management' else 'success' }}">
+                                    {{ secret.sender_role | replace('_', ' ') | title }}
+                                </span>
+                            </div>
+                            <span class="message-date">{{ secret.created_at[:10] if secret.created_at else 'N/A' }}</span>
+                        </div>
+                        <div class="message-content">
+                            <h4>{{ secret.title }}</h4>
+                            <div class="message-encrypted">
+                                <i class="fas fa-lock"></i>
+                                <span>Encrypted content - Click to decrypt</span>
+                            </div>
+                        </div>
+                        <div class="message-actions">
+                            <a href="{{ url_for('view_secret', secret_id=secret.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-unlock"></i> View & Decrypt
+                            </a>
+                            {% if not secret.is_read %}
+                            <span class="badge bg-warning">New</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No messages received</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-paper-plane"></i> Sent Messages</h2>
+            </div>
+            <div class="card-body">
+                {% if sent_secrets %}
+                <div class="message-list sent">
+                    {% for secret in sent_secrets %}
+                    <div class="message-item sent">
+                        <div class="message-header">
+                            <div class="message-recipient">
+                                <i class="fas fa-arrow-right"></i>
+                                <span>To: {{ secret.recipient_role | replace('_', ' ') | title }}</span>
+                            </div>
+                            <span class="message-date">{{ secret.created_at[:10] if secret.created_at else 'N/A' }}</span>
+                        </div>
+                        <div class="message-content">
+                            <h4>{{ secret.title }}</h4>
+                            <div class="message-status">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span>Encrypted & Sent</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-paper-plane"></i>
+                    <p>No messages sent yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

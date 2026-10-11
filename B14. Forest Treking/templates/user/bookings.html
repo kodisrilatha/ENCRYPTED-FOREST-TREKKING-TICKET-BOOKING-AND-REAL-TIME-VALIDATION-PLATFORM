@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings{% endblock %}
+{% block page_title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="card-header">
+        <h2><i class="fas fa-ticket-alt"></i> Booking History</h2>
+        <a href="{{ url_for('user_browse') }}" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus"></i> Book New Trek
+        </a>
+    </div>
+    <div class="card-body">
+        {% if bookings %}
+        <div class="bookings-list">
+            {% for booking in bookings %}
+            <div class="booking-card">
+                <div class="booking-card-left">
+                    <div class="booking-icon-large">
+                        <i class="fas fa-hiking"></i>
+                    </div>
+                </div>
+                <div class="booking-card-content">
+                    <div class="booking-card-header">
+                        <h3>{% if booking.route %}{{ booking.route.name }}{% else %}Trek Booking{% endif %}</h3>
+                        <span class="status-badge status-{{ booking.status }}">
+                            {% if booking.status == 'confirmed' %}
+                            <i class="fas fa-check-circle"></i>
+                            {% elif booking.status == 'cancelled' %}
+                            <i class="fas fa-times-circle"></i>
+                            {% else %}
+                            <i class="fas fa-clock"></i>
+                            {% endif %}
+                            {{ booking.status | title }}
+                        </span>
+                    </div>
+                    
+                    <div class="booking-card-details">
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ booking.booking_date }}</span>
+                        </div>
+                        {% if booking.schedule %}
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ booking.schedule.time }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ booking.num_participants }} participant(s)</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>${{ "%.2f"|format(booking.total_price) }}</span>
+                        </div>
+                        {% if booking.route %}
+                        <div class="detail-item">
+                            <span class="badge difficulty-{{ booking.route.difficulty }}">
+                                {{ booking.route.difficulty | title }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="booking-card-meta">
+                        <small>Booking ID: #{{ booking.id }}</small>
+                        <small>Created: {{ booking.created_at[:10] if booking.created_at else 'N/A' }}</small>
+                    </div>
+                </div>
+                <div class="booking-card-actions">
+                    {% if booking.status == 'confirmed' %}
+                    <form method="POST" action="{{ url_for('user_cancel_booking', booking_id=booking.id) }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state-large">
+            <div class="empty-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <h3>No Bookings Yet</h3>
+            <p>Start your adventure by booking a trek!</p>
+            <a href="{{ url_for('user_browse') }}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Browse Treks
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

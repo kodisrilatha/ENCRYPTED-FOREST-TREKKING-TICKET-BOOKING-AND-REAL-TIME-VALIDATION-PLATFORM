@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}My Files{% endblock %}
+{% block page_title %}Encrypted File Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5">
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-upload"></i> Upload & Encrypt File</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" class="form-styled">
+                    <div class="upload-zone mb-4">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p>Select a file to encrypt and upload</p>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                        <small class="text-muted">Allowed: txt, pdf, png, jpg, doc, docx, xls, xlsx</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-share-alt"></i> Share With</label>
+                        <div class="share-options">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="share_with" value="trekking_management" id="shareManager">
+                                <label class="form-check-label" for="shareManager">
+                                    <i class="fas fa-mountain text-warning"></i> Trekking Management
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="share_with" value="admin" id="shareAdmin">
+                                <label class="form-check-label" for="shareAdmin">
+                                    <i class="fas fa-shield-alt text-danger"></i> Administrators
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="encryption-notice">
+                        <i class="fas fa-lock"></i>
+                        <div>
+                            <strong>RIPEMD-160 Encryption</strong>
+                            <span>Your file will be securely encrypted</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        <i class="fas fa-lock"></i> Encrypt & Upload
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-7">
+        <div class="content-card mb-4">
+            <div class="card-header">
+                <h2><i class="fas fa-folder"></i> My Uploaded Files</h2>
+            </div>
+            <div class="card-body">
+                {% if my_files %}
+                <div class="file-grid">
+                    {% for file in my_files %}
+                    <div class="file-card">
+                        <div class="file-card-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="file-card-info">
+                            <span class="file-name">{{ file.original_filename }}</span>
+                            <span class="file-date">{{ file.created_at[:10] if file.created_at else 'N/A' }}</span>
+                        </div>
+                        <div class="file-card-status">
+                            <span class="badge bg-success"><i class="fas fa-lock"></i> Encrypted</span>
+                        </div>
+                        <div class="file-card-hash">
+                            <small><i class="fas fa-fingerprint"></i> {{ file.encryption_hash[:16] }}...</small>
+                        </div>
+                        <div class="file-card-actions">
+                            <a href="{{ url_for('download_encrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-primary" title="Download Encrypted">
+                                <i class="fas fa-file-download"></i> Encrypted
+                            </a>
+                            <a href="{{ url_for('download_decrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-success" title="Download Decrypted">
+                                <i class="fas fa-unlock"></i> Decrypted
+                            </a>
+                        </div>
+                        <div class="file-card-share mt-2">
+                            <form method="POST" action="{{ url_for('share_file', file_id=file.id) }}" class="d-flex gap-2">
+                                <select name="role" class="form-select form-select-sm">
+                                    <option value="trekking_management">Share with Mgmt</option>
+                                    <option value="admin">Share with Admin</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <p>No files uploaded yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="content-card">
+            <div class="card-header">
+                <h2><i class="fas fa-share-alt"></i> Files Shared With Me</h2>
+            </div>
+            <div class="card-body">
+                {% if shared_files %}
+                <div class="file-grid">
+                    {% for file in shared_files %}
+                    <div class="file-card shared">
+                        <div class="file-card-icon">
+                            <i class="fas fa-file-import"></i>
+                        </div>
+                        <div class="file-card-info">
+                            <span class="file-name">{{ file.original_filename }}</span>
+                            <span class="file-source">
+                                <i class="fas fa-user"></i> From: {{ file.uploader_role | replace('_', ' ') | title }}
+                            </span>
+                        </div>
+                        <div class="file-card-status">
+                            <span class="badge bg-info"><i class="fas fa-share-alt"></i> Shared</span>
+                        </div>
+                        <div class="file-card-actions">
+                            <a href="{{ url_for('download_encrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-primary" title="Download Encrypted">
+                                <i class="fas fa-file-download"></i> Encrypted
+                            </a>
+                            <a href="{{ url_for('download_decrypted', file_id=file.id) }}" class="btn btn-sm btn-outline-success" title="Download Decrypted">
+                                <i class="fas fa-unlock"></i> Decrypted
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No files shared with you yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
